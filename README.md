@@ -1,5 +1,8 @@
 # todox
 
+> [!WARNING]
+> **This is an experiment.** This repository exists to explore what AI can and cannot do across the entire software development lifecycle — and where human judgment remains essential. All code, issues, discussions, pull requests, and code reviews are authored and managed exclusively by [Claude Code](https://docs.anthropic.com/en/docs/claude-code) with no human review. Use this project at your own risk. The maintainers assume no responsibility for any issues arising from its use.
+
 Track TODO/FIXME/HACK comments in your codebase with git-aware diff and CI gate.
 
 ## Features
@@ -17,7 +20,7 @@ Tags: `TODO`, `FIXME`, `HACK`, `XXX`, `BUG`, `NOTE` (case-insensitive)
 // FIXME(alice): broken parsing logic
 // BUG: !! crashes on empty input       ← priority: urgent
 // TODO: fix layout issue #123          ← issue ref extracted
-// HACK(bob): workaround for JIRA-456  ← author + issue ref
+// HACK(bob): workaround for JIRA-456   ← author + issue ref
 ```
 
 ## Installation
