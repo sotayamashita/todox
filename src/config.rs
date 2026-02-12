@@ -11,7 +11,7 @@ pub struct Config {
     pub check: CheckConfig,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Default, Deserialize)]
 #[serde(default)]
 pub struct CheckConfig {
     pub max: Option<usize>,
@@ -33,16 +33,6 @@ impl Default for Config {
             exclude_dirs: vec![],
             exclude_patterns: vec![],
             check: CheckConfig::default(),
-        }
-    }
-}
-
-impl Default for CheckConfig {
-    fn default() -> Self {
-        Self {
-            max: None,
-            max_new: None,
-            block_tags: vec![],
         }
     }
 }

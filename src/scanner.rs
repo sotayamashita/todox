@@ -16,7 +16,7 @@ static ISSUE_REF_RE: LazyLock<Regex> =
 fn extract_issue_ref(message: &str) -> Option<String> {
     ISSUE_REF_RE.captures(message).map(|caps| {
         caps.get(1)
-            .or_else(|| caps.get(2).map(|m| m))
+            .or_else(|| caps.get(2))
             .map(|m| {
                 if caps.get(1).is_some() {
                     m.as_str().to_string()
