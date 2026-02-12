@@ -121,6 +121,22 @@ block_tags = ["BUG"]
 
 All fields are optional. Unspecified values use sensible defaults.
 
+## Agent Skill
+
+todox provides a [Claude Code skill](https://docs.anthropic.com/en/docs/claude-code/skills) that enables AI coding agents to automatically use todox commands for TODO tracking, CI gate configuration, and code quality checks.
+
+### Install with [skills CLI](https://github.com/vercel-labs/skills)
+
+```bash
+npx skills add sotayamashita/todox
+```
+
+### Manual install
+
+```bash
+cp -r .claude/skills/todox ~/.claude/skills/
+```
+
 ## CI Integration
 
 ### GitHub Actions
