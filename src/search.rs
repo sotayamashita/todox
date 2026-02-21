@@ -4,18 +4,14 @@ use crate::model::{ScanResult, SearchResult, TodoItem};
 
 fn matches_query(item: &TodoItem, query: &str, exact: bool) -> bool {
     if exact {
-        item.message.contains(query)
-            || item
-                .issue_ref
-                .as_deref()
-                .map_or(false, |r| r.contains(query))
+        item.message.contains(query) || item.issue_ref.as_deref().is_some_and(|r| r.contains(query))
     } else {
         let lower_query = query.to_lowercase();
         item.message.to_lowercase().contains(&lower_query)
             || item
                 .issue_ref
                 .as_deref()
-                .map_or(false, |r| r.to_lowercase().contains(&lower_query))
+                .is_some_and(|r| r.to_lowercase().contains(&lower_query))
     }
 }
 
