@@ -20,6 +20,14 @@
         }
       ]
     },
+    "clean": {
+      "description": "Clean detection settings",
+      "allOf": [
+        {
+          "$ref": "#/definitions/CleanConfig"
+        }
+      ]
+    },
     "exclude_dirs": {
       "description": "Directory names to skip during scanning",
       "default": [],
@@ -116,6 +124,37 @@
           ],
           "format": "uint",
           "minimum": 0.0
+        }
+      },
+      "additionalProperties": false
+    },
+    "CleanConfig": {
+      "description": "Clean detection settings for stale issues and duplicates",
+      "type": "object",
+      "properties": {
+        "duplicates": {
+          "description": "Enable duplicate detection (default: true)",
+          "default": null,
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "since": {
+          "description": "Only flag issues closed longer than this duration (e.g., \"30d\")",
+          "default": null,
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "stale_issues": {
+          "description": "Enable stale issue detection (default: true)",
+          "default": null,
+          "type": [
+            "boolean",
+            "null"
+          ]
         }
       },
       "additionalProperties": false

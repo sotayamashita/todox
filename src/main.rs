@@ -1,5 +1,6 @@
 mod blame;
 mod check;
+mod clean;
 mod cli;
 mod completions;
 mod config;
@@ -30,8 +31,8 @@ use diff::compute_diff;
 use lint::{run_lint, LintOverrides};
 use model::Tag;
 use output::{
-    print_blame, print_check, print_context, print_diff, print_lint, print_list, print_search,
-    print_stats,
+    print_blame, print_check, print_clean, print_context, print_diff, print_lint, print_list,
+    print_search, print_stats,
 };
 use scanner::scan_directory;
 use search::search_items;
@@ -153,6 +154,9 @@ fn run() -> Result<()> {
                 }
                 Command::Context { location, context } => {
                     cmd_context(&root, &config, &cli.format, &location, context)
+                }
+                Command::Clean { check, since } => {
+                    cmd_clean(&root, &config, &cli.format, check, since)
                 }
                 Command::Lint {
                     no_bare_tags,
@@ -475,6 +479,38 @@ fn cmd_lint(
     print_lint(&result, format);
 
     if !passed {
+        process::exit(1);
+    }
+
+    Ok(())
+}
+
+fn cmd_clean(
+    root: &std::path::Path,
+    config: &Config,
+    format: &Format,
+    check_mode: bool,
+    since: Option<String>,
+) -> Result<()> {
+    let scan = scan_directory(root, config)?;
+
+    // Try to create GhIssueChecker; warn if gh is unavailable
+    let gh_checker = clean::GhIssueChecker::new();
+    if gh_checker.is_none() && config.clean.stale_issues.unwrap_or(true) {
+        eprintln!("warning: gh CLI not found, skipping stale issue detection");
+    }
+
+    let result = clean::run_clean(
+        &scan,
+        config,
+        gh_checker.as_ref().map(|c| c as &dyn clean::IssueChecker),
+        since.as_deref(),
+    );
+    let has_violations = !result.passed;
+
+    print_clean(&result, format);
+
+    if check_mode && has_violations {
         process::exit(1);
     }
 

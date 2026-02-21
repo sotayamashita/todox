@@ -190,6 +190,52 @@ pub fn format_check(result: &CheckResult) -> String {
     lines.join("\n")
 }
 
+pub fn format_clean(result: &CleanResult) -> String {
+    let mut lines: Vec<String> = Vec::new();
+
+    if result.passed {
+        lines.push("## PASS".to_string());
+        lines.push(String::new());
+        lines.push(format!(
+            "All clean checks passed ({} items total).",
+            result.total_items
+        ));
+    } else {
+        lines.push("## FAIL".to_string());
+        lines.push(String::new());
+        lines.push("| File | Line | Rule | Message | Detail |".to_string());
+        lines.push("|------|------|------|---------|--------|".to_string());
+
+        for v in &result.violations {
+            let file = escape_cell(&v.file);
+            let message = escape_cell(&v.message);
+            let detail = if let Some(ref dup_of) = v.duplicate_of {
+                format!("duplicate of {}", dup_of)
+            } else if let Some(ref issue_ref) = v.issue_ref {
+                issue_ref.clone()
+            } else {
+                String::new()
+            };
+            lines.push(format!(
+                "| {} | {} | {} | {} | {} |",
+                file, v.line, v.rule, message, detail
+            ));
+        }
+
+        lines.push(String::new());
+        lines.push(format!(
+            "**{} violations ({} stale, {} duplicates) in {} items**",
+            result.violations.len(),
+            result.stale_count,
+            result.duplicate_count,
+            result.total_items
+        ));
+    }
+
+    lines.push(String::new());
+    lines.join("\n")
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

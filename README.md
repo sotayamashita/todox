@@ -42,6 +42,10 @@ Scrolling through `todox list` output or manually grepping to find specific TODO
 
 TODO comments in team codebases drift in format — inconsistent casing, missing colons, missing authors — degrading scanner reliability and code hygiene. `todox lint` enforces configurable formatting rules (uppercase tags, colons, author attribution, issue references, message length) and exits with code 1 on violations, making it CI-ready out of the box. Run `todox lint` for sensible defaults, or configure rules in `.todox.toml` under `[lint]`.
 
+**`todox clean`**
+
+TODOs accumulate faster than they resolve, and no amount of listing or linting reduces the pile. `todox clean` identifies TODOs that should be removed: those referencing closed GitHub issues (stale) and those with identical messages across files (duplicates). Run `todox clean` for a dry-run report, or `todox clean --check` in CI to fail the build when stale or duplicate TODOs exist.
+
 **`todox check`**
 
 Without enforcement, TODO debt grows silently until it becomes unmanageable. `todox check` acts as a CI gate that fails the build when TODO counts exceed a threshold, forbidden tags appear, too many new TODOs are introduced, or deadlines have expired. Run `todox check --max 100 --block-tags BUG` in your CI pipeline, or `todox check --expired` to catch overdue TODOs.
@@ -250,6 +254,24 @@ todox lint --format json
 
 Exit codes: `0` = pass, `1` = fail, `2` = error.
 
+### Clean — stale issues and duplicates
+
+```bash
+# Dry-run: show stale and duplicate TODOs (always exit 0)
+todox clean
+
+# CI gate: exit 1 if any violations found
+todox clean --check
+
+# Only flag issues closed more than 30 days ago
+todox clean --since 30d
+
+# JSON output
+todox clean --format json
+```
+
+Exit codes (with `--check`): `0` = pass, `1` = fail, `2` = error. Without `--check`, always exits `0`.
+
 ### CI gate
 
 ```bash
@@ -347,6 +369,16 @@ expired = true
 # Days threshold for marking TODOs as stale (default: 365d)
 stale_threshold = "180d"
 
+[clean]
+# Enable stale issue detection (default: true)
+stale_issues = true
+
+# Enable duplicate detection (default: true)
+duplicates = true
+
+# Only flag issues closed longer than this duration (default: disabled)
+# since = "30d"
+
 [lint]
 # Reject TODOs with empty message (default: true)
 no_bare_tags = true
@@ -395,6 +427,14 @@ A machine-readable JSON Schema is available at [`schema/todox.schema.json`](sche
 | Field | Type | Default | Description |
 |---|---|---|---|
 | `stale_threshold` | `string` | `"365d"` | Duration threshold for marking TODOs as stale |
+
+#### `[clean]` section
+
+| Field | Type | Default | Description |
+|---|---|---|---|
+| `stale_issues` | `boolean` | `true` | Enable stale issue detection via `gh` CLI |
+| `duplicates` | `boolean` | `true` | Enable duplicate TODO detection |
+| `since` | `string` | _(none)_ | Only flag issues closed longer than this duration (e.g., `"30d"`) |
 
 #### `[lint]` section
 

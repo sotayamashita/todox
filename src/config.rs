@@ -20,6 +20,8 @@ pub struct Config {
     pub blame: BlameConfig,
     /// Lint rule settings
     pub lint: LintConfig,
+    /// Clean detection settings
+    pub clean: CleanConfig,
 }
 
 /// CI gate check settings
@@ -65,6 +67,19 @@ pub struct LintConfig {
     pub require_colon: Option<bool>,
 }
 
+/// Clean detection settings for stale issues and duplicates
+#[derive(Debug, Default, Deserialize, JsonSchema)]
+#[serde(default)]
+#[schemars(deny_unknown_fields)]
+pub struct CleanConfig {
+    /// Enable stale issue detection (default: true)
+    pub stale_issues: Option<bool>,
+    /// Enable duplicate detection (default: true)
+    pub duplicates: Option<bool>,
+    /// Only flag issues closed longer than this duration (e.g., "30d")
+    pub since: Option<String>,
+}
+
 impl Default for Config {
     fn default() -> Self {
         Self {
@@ -81,6 +96,7 @@ impl Default for Config {
             check: CheckConfig::default(),
             blame: BlameConfig::default(),
             lint: LintConfig::default(),
+            clean: CleanConfig::default(),
         }
     }
 }

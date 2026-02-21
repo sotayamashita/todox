@@ -186,6 +186,17 @@ pub enum Command {
         debounce: u64,
     },
 
+    /// Find stale issue references and duplicate TODOs
+    Clean {
+        /// Exit with code 1 if any violations found (CI gate mode)
+        #[arg(long)]
+        check: bool,
+
+        /// Only flag issues closed longer than this duration (e.g., "30d")
+        #[arg(long)]
+        since: Option<String>,
+    },
+
     /// Lint TODO comment formatting against configurable rules
     Lint {
         /// Reject TODOs with empty message

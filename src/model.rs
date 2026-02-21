@@ -223,6 +223,25 @@ pub struct WatchEvent {
     pub total_delta: i64,
 }
 
+#[derive(Debug, Clone, Serialize)]
+pub struct CleanViolation {
+    pub rule: String,
+    pub message: String,
+    pub file: String,
+    pub line: usize,
+    pub issue_ref: Option<String>,
+    pub duplicate_of: Option<String>,
+}
+
+#[derive(Debug, Serialize)]
+pub struct CleanResult {
+    pub passed: bool,
+    pub total_items: usize,
+    pub stale_count: usize,
+    pub duplicate_count: usize,
+    pub violations: Vec<CleanViolation>,
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Severity {
     Error,

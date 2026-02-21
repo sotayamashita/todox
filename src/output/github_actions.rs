@@ -140,6 +140,28 @@ pub fn format_check(result: &CheckResult) -> String {
     lines.join("\n")
 }
 
+pub fn format_clean(result: &CleanResult) -> String {
+    let mut lines: Vec<String> = Vec::new();
+    if result.passed {
+        lines.push("::notice::todox clean: PASS".to_string());
+    } else {
+        for violation in &result.violations {
+            let file = escape_property(&violation.file);
+            let msg = escape_message(&violation.message);
+            lines.push(format!(
+                "::error file={file},line={},title={}::{msg}",
+                violation.line, violation.rule
+            ));
+        }
+        lines.push(format!(
+            "::error::todox clean: FAIL ({} stale, {} duplicates)",
+            result.stale_count, result.duplicate_count
+        ));
+    }
+    lines.push(String::new());
+    lines.join("\n")
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
