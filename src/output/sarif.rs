@@ -101,6 +101,36 @@ pub fn format_diff(result: &DiffResult) -> String {
     output
 }
 
+pub fn format_blame(result: &BlameResult) -> String {
+    let results: Vec<serde_json::Value> = result
+        .entries
+        .iter()
+        .map(|entry| {
+            let mut r = item_to_result(&entry.item);
+            r.as_object_mut().unwrap().insert(
+                "properties".to_string(),
+                serde_json::json!({
+                    "blame": {
+                        "author": entry.blame.author,
+                        "email": entry.blame.email,
+                        "date": entry.blame.date,
+                        "ageDays": entry.blame.age_days,
+                        "commit": entry.blame.commit,
+                        "stale": entry.stale,
+                    }
+                }),
+            );
+            r
+        })
+        .collect();
+
+    let all_items: Vec<&TodoItem> = result.entries.iter().map(|e| &e.item).collect();
+    let rules = collect_rules(&all_items);
+    let mut output = build_sarif_envelope(results, rules);
+    output.push('\n');
+    output
+}
+
 pub fn format_check(result: &CheckResult) -> String {
     let results: Vec<serde_json::Value> = result
         .violations

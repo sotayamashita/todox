@@ -1,3 +1,4 @@
+mod blame;
 mod check;
 mod cli;
 mod completions;
@@ -5,6 +6,7 @@ mod config;
 mod context;
 mod deadline;
 mod diff;
+mod git;
 mod init;
 mod model;
 mod output;
@@ -16,13 +18,14 @@ use std::process;
 use anyhow::{Context, Result};
 use clap::Parser;
 
+use blame::compute_blame;
 use check::{run_check, CheckOverrides};
-use cli::{Cli, Command, Format, GroupBy, PriorityFilter, SortBy};
+use cli::{BlameSortBy, Cli, Command, Format, GroupBy, PriorityFilter, SortBy};
 use config::Config;
 use context::{build_rich_context, collect_context_map, parse_location};
 use diff::compute_diff;
 use model::Tag;
-use output::{print_check, print_context, print_diff, print_list, print_stats};
+use output::{print_blame, print_check, print_context, print_diff, print_list, print_stats};
 use scanner::scan_directory;
 use stats::compute_stats;
 
@@ -79,6 +82,24 @@ fn run() -> Result<()> {
                     };
                     cmd_list(&root, &config, &cli.format, opts)
                 }
+                Command::Blame {
+                    sort,
+                    author,
+                    min_age,
+                    stale_threshold,
+                    tag,
+                    path,
+                } => cmd_blame(
+                    &root,
+                    &config,
+                    &cli.format,
+                    sort,
+                    author,
+                    min_age,
+                    stale_threshold,
+                    tag,
+                    path,
+                ),
                 Command::Stats { since } => cmd_stats(&root, &config, &cli.format, since),
                 Command::Diff {
                     git_ref,
@@ -312,5 +333,90 @@ fn cmd_stats(
 
     let result = compute_stats(&scan, diff.as_ref());
     print_stats(&result, format);
+    Ok(())
+}
+
+#[allow(clippy::too_many_arguments)]
+fn cmd_blame(
+    root: &std::path::Path,
+    config: &Config,
+    format: &Format,
+    sort: BlameSortBy,
+    author_filter: Option<String>,
+    min_age: Option<String>,
+    stale_threshold_cli: Option<String>,
+    tag_filter: Vec<String>,
+    path_filter: Option<String>,
+) -> Result<()> {
+    let scan = scan_directory(root, config)?;
+
+    // Resolve stale threshold: CLI > config > default (365d)
+    let threshold_str = stale_threshold_cli
+        .or_else(|| config.blame.stale_threshold.clone())
+        .unwrap_or_else(|| "365d".to_string());
+    let stale_threshold = blame::parse_duration_days(&threshold_str)?;
+
+    let mut result = compute_blame(&scan, root, stale_threshold)?;
+
+    // Apply tag filter
+    if !tag_filter.is_empty() {
+        let filter_tags: Vec<Tag> = tag_filter
+            .iter()
+            .filter_map(|s| s.parse::<Tag>().ok())
+            .collect();
+        result.entries.retain(|e| filter_tags.contains(&e.item.tag));
+    }
+
+    // Apply author filter (substring match)
+    if let Some(ref author) = author_filter {
+        let lower = author.to_lowercase();
+        result
+            .entries
+            .retain(|e| e.blame.author.to_lowercase().contains(&lower));
+    }
+
+    // Apply min-age filter
+    if let Some(ref age_str) = min_age {
+        let min_days = blame::parse_duration_days(age_str)?;
+        result.entries.retain(|e| e.blame.age_days >= min_days);
+    }
+
+    // Apply path filter
+    if let Some(ref pattern) = path_filter {
+        let glob = globset::Glob::new(pattern)
+            .context("invalid glob pattern")?
+            .compile_matcher();
+        result.entries.retain(|e| glob.is_match(&e.item.file));
+    }
+
+    // Apply sort
+    match sort {
+        BlameSortBy::File => result.entries.sort_by(|a, b| {
+            a.item
+                .file
+                .cmp(&b.item.file)
+                .then(a.item.line.cmp(&b.item.line))
+        }),
+        BlameSortBy::Age => result
+            .entries
+            .sort_by(|a, b| b.blame.age_days.cmp(&a.blame.age_days)),
+        BlameSortBy::Author => result
+            .entries
+            .sort_by(|a, b| a.blame.author.cmp(&b.blame.author)),
+        BlameSortBy::Tag => result
+            .entries
+            .sort_by(|a, b| a.item.tag.severity().cmp(&b.item.tag.severity()).reverse()),
+    }
+
+    // Recompute summary after filtering
+    result.total = result.entries.len();
+    result.stale_count = result.entries.iter().filter(|e| e.stale).count();
+    result.avg_age_days = if result.total > 0 {
+        result.entries.iter().map(|e| e.blame.age_days).sum::<u64>() / result.total as u64
+    } else {
+        0
+    };
+
+    print_blame(&result, format);
     Ok(())
 }

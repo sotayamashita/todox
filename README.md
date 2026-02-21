@@ -30,6 +30,10 @@ New TODOs slip into pull requests unnoticed while resolved ones go unrecognized.
 
 A flat list of TODOs makes it hard to see the big picture — whether tech debt is growing, who owns the most items, and which files are hotspots. `todox stats` provides a dashboard summary with tag and author breakdowns, priority distribution, and top files by TODO count. Add `--since <ref>` to see the trend of added and removed items over time.
 
+**`todox blame`**
+
+TODO comments lack accountability — you can't tell who wrote them or when without manually running `git blame`. `todox blame` enriches each TODO with git blame metadata including author, commit date, and age in days, and flags items older than a configurable threshold as stale. Run `todox blame` to see all TODOs with ownership info, `todox blame --sort age` to find the oldest ones, or `todox blame --author alice --min-age 90d` to filter by author and age.
+
 **`todox check`**
 
 Without enforcement, TODO debt grows silently until it becomes unmanageable. `todox check` acts as a CI gate that fails the build when TODO counts exceed a threshold, forbidden tags appear, too many new TODOs are introduced, or deadlines have expired. Run `todox check --max 100 --block-tags BUG` in your CI pipeline, or `todox check --expired` to catch overdue TODOs.
@@ -146,6 +150,32 @@ todox diff main --tag FIXME
 todox diff main --format json
 ```
 
+### Blame — TODO age and ownership
+
+```bash
+# Show all TODOs with git blame metadata
+todox blame
+
+# Sort by age (oldest first)
+todox blame --sort age
+
+# Filter by author (substring match)
+todox blame --author alice
+
+# Filter by minimum age
+todox blame --min-age 90d
+
+# Set stale threshold (default: 365 days)
+todox blame --stale-threshold 180d
+
+# Filter by tag or path
+todox blame --tag TODO
+todox blame --path "src/**"
+
+# JSON output
+todox blame --format json
+```
+
 ### Stats dashboard
 
 ```bash
@@ -251,6 +281,10 @@ block_tags = ["BUG"]
 
 # Fail if any TODOs have expired deadlines
 expired = true
+
+[blame]
+# Days threshold for marking TODOs as stale (default: 365d)
+stale_threshold = "180d"
 ```
 
 All fields are optional. Unspecified values use sensible defaults.

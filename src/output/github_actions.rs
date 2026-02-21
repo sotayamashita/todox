@@ -63,6 +63,36 @@ pub fn format_diff(result: &DiffResult) -> String {
     lines.join("\n")
 }
 
+pub fn format_blame(result: &BlameResult) -> String {
+    let mut lines: Vec<String> = Vec::new();
+
+    for entry in &result.entries {
+        let level = if entry.stale { "warning" } else { "notice" };
+        let file = escape_property(&entry.item.file);
+        let tag = entry.item.tag.as_str();
+        let msg = escape_message(&format!(
+            "[{}] {} @{} {} ({} days ago)",
+            tag, entry.item.message, entry.blame.author, entry.blame.date, entry.blame.age_days,
+        ));
+        let title = if entry.stale {
+            format!("Stale {}", tag)
+        } else {
+            tag.to_string()
+        };
+        lines.push(format!(
+            "::{level} file={file},line={},title={title}::{msg}",
+            entry.item.line,
+        ));
+    }
+
+    lines.push(format!(
+        "::notice::todox blame: {} items, {} stale",
+        result.total, result.stale_count,
+    ));
+    lines.push(String::new());
+    lines.join("\n")
+}
+
 pub fn format_check(result: &CheckResult) -> String {
     let mut lines: Vec<String> = Vec::new();
     if result.passed {

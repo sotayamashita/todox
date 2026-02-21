@@ -154,6 +154,32 @@ pub struct TrendInfo {
     pub base_ref: String,
 }
 
+#[derive(Debug, Clone, Serialize)]
+pub struct BlameInfo {
+    pub author: String,
+    pub email: String,
+    pub date: String,
+    pub age_days: u64,
+    pub commit: String,
+}
+
+#[derive(Debug, Clone, Serialize)]
+pub struct BlameEntry {
+    #[serde(flatten)]
+    pub item: TodoItem,
+    pub blame: BlameInfo,
+    pub stale: bool,
+}
+
+#[derive(Debug, Serialize)]
+pub struct BlameResult {
+    pub entries: Vec<BlameEntry>,
+    pub total: usize,
+    pub avg_age_days: u64,
+    pub stale_count: usize,
+    pub stale_threshold_days: u64,
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Severity {
     Error,
