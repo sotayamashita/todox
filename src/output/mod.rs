@@ -402,6 +402,61 @@ pub fn print_check(result: &CheckResult, format: &Format) {
     }
 }
 
+pub fn print_blame(result: &BlameResult, format: &Format) {
+    match format {
+        Format::Text => {
+            // Group by file
+            let mut groups: Vec<(String, Vec<&BlameEntry>)> = Vec::new();
+            let mut key_index: std::collections::HashMap<String, usize> =
+                std::collections::HashMap::new();
+
+            for entry in &result.entries {
+                let key = entry.item.file.clone();
+                if let Some(&idx) = key_index.get(&key) {
+                    groups[idx].1.push(entry);
+                } else {
+                    key_index.insert(key.clone(), groups.len());
+                    groups.push((key, vec![entry]));
+                }
+            }
+
+            for (file, entries) in &groups {
+                println!("{}", file.bold().underline());
+                for entry in entries {
+                    let tag_str = colorize_tag(&entry.item.tag);
+                    let stale_marker = if entry.stale {
+                        " [STALE]".red().to_string()
+                    } else {
+                        String::new()
+                    };
+                    println!(
+                        "  L{}: [{}] {} @{} {} ({} days ago){}",
+                        entry.item.line,
+                        tag_str,
+                        entry.item.message,
+                        entry.blame.author,
+                        entry.blame.date,
+                        entry.blame.age_days,
+                        stale_marker,
+                    );
+                }
+            }
+
+            println!(
+                "\n{} items, avg age {} days, {} stale (threshold: {} days)",
+                result.total, result.avg_age_days, result.stale_count, result.stale_threshold_days,
+            );
+        }
+        Format::Json => {
+            let json = serde_json::to_string_pretty(result).expect("failed to serialize");
+            println!("{}", json);
+        }
+        Format::GithubActions => print!("{}", github_actions::format_blame(result)),
+        Format::Sarif => print!("{}", sarif::format_blame(result)),
+        Format::Markdown => print!("{}", markdown::format_blame(result)),
+    }
+}
+
 pub fn print_context(rich: &RichContext, format: &Format) {
     match format {
         Format::Text => {

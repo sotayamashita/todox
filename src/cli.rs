@@ -98,6 +98,28 @@ pub enum Command {
         shell: Shell,
     },
 
+    /// Show git blame metadata for TODO comments
+    Blame {
+        #[arg(long, value_enum, default_value = "file")]
+        sort: BlameSortBy,
+
+        #[arg(long)]
+        author: Option<String>,
+
+        #[arg(long)]
+        min_age: Option<String>,
+
+        /// Days threshold for marking TODOs as stale (default: 365)
+        #[arg(long)]
+        stale_threshold: Option<String>,
+
+        #[arg(long)]
+        tag: Vec<String>,
+
+        #[arg(long)]
+        path: Option<String>,
+    },
+
     Stats {
         #[arg(long)]
         since: Option<String>,
@@ -142,6 +164,14 @@ pub enum PriorityFilter {
     Normal,
     High,
     Urgent,
+}
+
+#[derive(Clone, ValueEnum)]
+pub enum BlameSortBy {
+    File,
+    Age,
+    Author,
+    Tag,
 }
 
 impl PriorityFilter {

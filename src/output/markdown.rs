@@ -74,6 +74,32 @@ pub fn format_diff(result: &DiffResult) -> String {
     lines.join("\n")
 }
 
+pub fn format_blame(result: &BlameResult) -> String {
+    let mut lines: Vec<String> = Vec::new();
+
+    lines.push("| File | Line | Tag | Message | Author | Date | Age (days) | Stale |".to_string());
+    lines.push("|------|------|-----|---------|--------|------|------------|-------|".to_string());
+
+    for entry in &result.entries {
+        let file = escape_cell(&entry.item.file);
+        let tag = entry.item.tag.as_str();
+        let message = escape_cell(&entry.item.message);
+        let stale = if entry.stale { "Yes" } else { "" };
+        lines.push(format!(
+            "| {file} | {} | {tag} | {message} | {} | {} | {} | {stale} |",
+            entry.item.line, entry.blame.author, entry.blame.date, entry.blame.age_days,
+        ));
+    }
+
+    lines.push(String::new());
+    lines.push(format!(
+        "**{} items, avg age {} days, {} stale** (threshold: {} days)",
+        result.total, result.avg_age_days, result.stale_count, result.stale_threshold_days,
+    ));
+    lines.push(String::new());
+    lines.join("\n")
+}
+
 pub fn format_check(result: &CheckResult) -> String {
     let mut lines: Vec<String> = Vec::new();
 

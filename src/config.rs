@@ -9,6 +9,7 @@ pub struct Config {
     pub exclude_dirs: Vec<String>,
     pub exclude_patterns: Vec<String>,
     pub check: CheckConfig,
+    pub blame: BlameConfig,
 }
 
 #[derive(Debug, Default, Deserialize)]
@@ -18,6 +19,12 @@ pub struct CheckConfig {
     pub max_new: Option<usize>,
     pub block_tags: Vec<String>,
     pub expired: Option<bool>,
+}
+
+#[derive(Debug, Default, Deserialize)]
+#[serde(default)]
+pub struct BlameConfig {
+    pub stale_threshold: Option<String>,
 }
 
 impl Default for Config {
@@ -34,6 +41,7 @@ impl Default for Config {
             exclude_dirs: vec![],
             exclude_patterns: vec![],
             check: CheckConfig::default(),
+            blame: BlameConfig::default(),
         }
     }
 }
