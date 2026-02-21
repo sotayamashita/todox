@@ -280,6 +280,97 @@ pub fn format_check(result: &CheckResult) -> String {
     output
 }
 
+pub fn format_clean(result: &CleanResult) -> String {
+    let results: Vec<serde_json::Value> = result
+        .violations
+        .iter()
+        .map(|v| {
+            let mut r = serde_json::json!({
+                "ruleId": format!("todox/clean/{}", v.rule),
+                "level": "error",
+                "message": {
+                    "text": v.message
+                },
+                "locations": [{
+                    "physicalLocation": {
+                        "artifactLocation": {
+                            "uri": v.file
+                        },
+                        "region": {
+                            "startLine": v.line
+                        }
+                    }
+                }]
+            });
+            let mut props = serde_json::Map::new();
+            if let Some(ref issue_ref) = v.issue_ref {
+                props.insert(
+                    "issueRef".to_string(),
+                    serde_json::Value::String(issue_ref.clone()),
+                );
+            }
+            if let Some(ref duplicate_of) = v.duplicate_of {
+                props.insert(
+                    "duplicateOf".to_string(),
+                    serde_json::Value::String(duplicate_of.clone()),
+                );
+            }
+            if !props.is_empty() {
+                r.as_object_mut()
+                    .unwrap()
+                    .insert("properties".to_string(), serde_json::Value::Object(props));
+            }
+            r
+        })
+        .collect();
+
+    let mut seen = std::collections::BTreeSet::new();
+    let rules: Vec<serde_json::Value> = result
+        .violations
+        .iter()
+        .filter_map(|v| {
+            let id = format!("todox/clean/{}", v.rule);
+            if seen.insert(id.clone()) {
+                Some(serde_json::json!({
+                    "id": id,
+                    "shortDescription": {
+                        "text": format!("{} clean rule", v.rule)
+                    }
+                }))
+            } else {
+                None
+            }
+        })
+        .collect();
+
+    let final_results = if result.passed && results.is_empty() {
+        vec![serde_json::json!({
+            "ruleId": "todox/clean/summary",
+            "level": "note",
+            "message": {
+                "text": format!("All clean checks passed ({} items)", result.total_items)
+            }
+        })]
+    } else {
+        results
+    };
+
+    let final_rules = if result.passed && rules.is_empty() {
+        vec![serde_json::json!({
+            "id": "todox/clean/summary",
+            "shortDescription": {
+                "text": "todox clean summary"
+            }
+        })]
+    } else {
+        rules
+    };
+
+    let mut output = build_sarif_envelope(final_results, final_rules);
+    output.push('\n');
+    output
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

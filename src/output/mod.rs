@@ -561,6 +561,59 @@ pub fn print_lint(result: &LintResult, format: &Format) {
     }
 }
 
+pub fn print_clean(result: &CleanResult, format: &Format) {
+    match format {
+        Format::Text => {
+            if result.passed {
+                println!("{}", "PASS".green().bold());
+                println!("{} items checked, no violations", result.total_items);
+            } else {
+                println!("{}", "FAIL".red().bold());
+
+                // Group violations by file
+                let mut groups: Vec<(String, Vec<&CleanViolation>)> = Vec::new();
+                let mut key_index: std::collections::HashMap<String, usize> =
+                    std::collections::HashMap::new();
+
+                for v in &result.violations {
+                    let key = v.file.clone();
+                    if let Some(&idx) = key_index.get(&key) {
+                        groups[idx].1.push(v);
+                    } else {
+                        key_index.insert(key.clone(), groups.len());
+                        groups.push((key, vec![v]));
+                    }
+                }
+
+                for (file, violations) in &groups {
+                    println!("{}", file.bold().underline());
+                    for v in violations {
+                        let mut line =
+                            format!("  L{}: {} - {}", v.line, v.rule.yellow(), v.message);
+                        if let Some(ref dup_of) = v.duplicate_of {
+                            line.push_str(&format!(" (duplicate of {})", dup_of));
+                        }
+                        println!("{}", line);
+                    }
+                }
+
+                let violation_count = result.violations.len();
+                println!(
+                    "\n{} violations ({} stale, {} duplicates) in {} items",
+                    violation_count, result.stale_count, result.duplicate_count, result.total_items
+                );
+            }
+        }
+        Format::Json => {
+            let json = serde_json::to_string_pretty(result).expect("failed to serialize");
+            println!("{}", json);
+        }
+        Format::GithubActions => print!("{}", github_actions::format_clean(result)),
+        Format::Sarif => print!("{}", sarif::format_clean(result)),
+        Format::Markdown => print!("{}", markdown::format_clean(result)),
+    }
+}
+
 pub fn print_check(result: &CheckResult, format: &Format) {
     match format {
         Format::Text => {
