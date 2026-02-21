@@ -509,6 +509,7 @@ cp -r .claude/skills/todox ~/.claude/skills/
 ```yaml
 - name: Scan TODOs
   run: todox list --format sarif > todox.sarif
+
 - name: Upload SARIF
   uses: github/codeql-action/upload-sarif@v3
   with:
@@ -520,12 +521,12 @@ cp -r .claude/skills/todox ~/.claude/skills/
 ```yaml
 - name: Generate TODO report
   run: todox report --output todox-report.html
+
 - name: Upload TODO report
   uses: actions/upload-artifact@v4
   with:
     name: todox-report
     path: todox-report.html
-    retention-days: 1
 ```
 
 ### PR review with diff
