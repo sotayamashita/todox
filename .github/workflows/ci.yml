@@ -44,3 +44,10 @@ jobs:
 
       - name: Build release
         run: cargo build --release
+
+      - name: TODO gate
+        run: cargo run --release -- check --max 200
+
+      - name: TODO diff (PR only)
+        if: github.event_name == 'pull_request'
+        run: cargo run --release -- diff ${{ github.event.pull_request.base.sha }}
