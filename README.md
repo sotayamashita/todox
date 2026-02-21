@@ -213,7 +213,15 @@ cp -r .claude/skills/todox ~/.claude/skills/
 
 ### PR review with diff
 
+> **Note:** `todox diff` and `todox check --since` need access to the base ref's git history.
+> `actions/checkout@v4` uses `fetch-depth: 1` (shallow clone) by default, which means the base
+> SHA is not available. Set `fetch-depth: 0` to fetch the full history.
+
 ```yaml
+- uses: actions/checkout@v4
+  with:
+    fetch-depth: 0  # Required for todox to access the base ref
+
 - name: Check new TODOs
   run: |
     todox check --max-new 0 --since origin/main
