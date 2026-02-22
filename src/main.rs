@@ -7,6 +7,7 @@ mod cmd;
 mod completions;
 mod config;
 mod context;
+mod date_utils;
 mod deadline;
 mod diff;
 mod git;

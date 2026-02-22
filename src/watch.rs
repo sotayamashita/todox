@@ -10,6 +10,7 @@ use regex::Regex;
 
 use crate::cli::Format;
 use crate::config::Config;
+use crate::date_utils;
 use crate::model::{FileUpdate, Tag, TodoItem, WatchEvent};
 use crate::output::{print_initial_summary, print_watch_event};
 use crate::scanner::{scan_content, scan_directory};
@@ -160,16 +161,7 @@ fn build_watch_event(
         .map(|(tag, count)| (tag.as_str().to_string(), count))
         .collect();
 
-    let now = time::OffsetDateTime::now_utc();
-    let timestamp = format!(
-        "{:04}-{:02}-{:02}T{:02}:{:02}:{:02}Z",
-        now.year(),
-        now.month() as u8,
-        now.day(),
-        now.hour(),
-        now.minute(),
-        now.second(),
-    );
+    let timestamp = date_utils::now_iso8601();
 
     WatchEvent {
         timestamp,

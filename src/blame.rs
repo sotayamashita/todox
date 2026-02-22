@@ -4,6 +4,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 use anyhow::{Context, Result};
 
+use crate::date_utils;
 use crate::git::git_command;
 use crate::model::{BlameEntry, BlameInfo, BlameResult, ScanResult, TodoItem};
 
@@ -69,7 +70,7 @@ pub fn blame_file(file_path: &str, root: &Path) -> Result<HashMap<usize, RawBlam
 pub fn timestamp_to_date_string(timestamp: i64) -> String {
     // Manual conversion without external date library
     let days_since_epoch = timestamp / 86400;
-    let (year, month, day) = days_to_ymd(days_since_epoch);
+    let (year, month, day) = date_utils::days_to_ymd(days_since_epoch);
     format!("{:04}-{:02}-{:02}", year, month, day)
 }
 
@@ -93,22 +94,6 @@ pub fn parse_duration_days(s: &str) -> Result<u64> {
     numeric
         .parse::<u64>()
         .with_context(|| format!("invalid duration: {}", s))
-}
-
-/// Convert days since epoch to (year, month, day).
-fn days_to_ymd(days: i64) -> (i64, u32, u32) {
-    // Algorithm based on civil_from_days from Howard Hinnant
-    let z = days + 719468;
-    let era = if z >= 0 { z } else { z - 146096 } / 146097;
-    let doe = (z - era * 146097) as u64;
-    let yoe = (doe - doe / 1460 + doe / 36524 - doe / 146096) / 365;
-    let y = yoe as i64 + era * 400;
-    let doy = doe - (365 * yoe + yoe / 4 - yoe / 100);
-    let mp = (5 * doy + 2) / 153;
-    let d = doy - (153 * mp + 2) / 5 + 1;
-    let m = if mp < 10 { mp + 3 } else { mp - 9 };
-    let y = if m <= 2 { y + 1 } else { y };
-    (y, m as u32, d as u32)
 }
 
 /// Build blame entries for all TODO items in a scan result.

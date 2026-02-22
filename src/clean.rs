@@ -6,6 +6,7 @@ use regex::Regex;
 
 use crate::blame::parse_duration_days;
 use crate::config::Config;
+use crate::date_utils;
 use crate::model::{CleanResult, CleanViolation, ScanResult, TodoItem};
 
 static ISO8601_RE: LazyLock<Regex> =
@@ -95,24 +96,8 @@ fn parse_iso8601_timestamp(s: &str) -> Option<i64> {
     let sec: i64 = caps[6].parse().ok()?;
 
     // Simple days-from-epoch calculation
-    let days = ymd_to_days(year, month, day);
+    let days = date_utils::ymd_to_days(year, month, day);
     Some(days * 86400 + hour * 3600 + min * 60 + sec)
-}
-
-/// Convert (year, month, day) to days since Unix epoch.
-fn ymd_to_days(year: i64, month: u32, day: u32) -> i64 {
-    // Algorithm based on Howard Hinnant's civil_from_days (inverse)
-    let y = if month <= 2 { year - 1 } else { year };
-    let m = if month <= 2 {
-        month as i64 + 9
-    } else {
-        month as i64 - 3
-    };
-    let era = if y >= 0 { y } else { y - 399 } / 400;
-    let yoe = (y - era * 400) as u64;
-    let doy = (153 * m as u64 + 2) / 5 + day as u64 - 1;
-    let doe = yoe * 365 + yoe / 4 - yoe / 100 + doy;
-    era * 146097 + doe as i64 - 719468
 }
 
 /// Normalize a TODO message for duplicate comparison.
