@@ -143,3 +143,24 @@ fn test_context_custom_window() {
         .stdout(predicate::str::contains("\"line_number\": 1").not())
         .stdout(predicate::str::contains("\"line_number\": 6").not());
 }
+
+#[test]
+fn test_context_resolves_stable_id() {
+    let dir = setup_project(&[(
+        "main.rs",
+        "fn main() {\n    let x = 1;\n    // TODO: fix this\n    let y = 2;\n}\n",
+    )]);
+
+    // Use the stable ID format instead of file:line
+    todox()
+        .args([
+            "context",
+            "main.rs:TODO:fix this",
+            "--root",
+            dir.path().to_str().unwrap(),
+        ])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("main.rs:3"))
+        .stdout(predicate::str::contains("TODO: fix this"));
+}

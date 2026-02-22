@@ -155,6 +155,18 @@ pub fn collect_context_map(
     context_map
 }
 
+/// Resolve a location that may be a stable TODO ID or a `file:line` string.
+/// First tries to match against `item.id()` for all scanned items.
+/// Falls back to `parse_location()` if no ID match is found.
+pub fn resolve_location(location: &str, items: &[TodoItem]) -> Result<(String, usize)> {
+    for item in items {
+        if item.id() == location {
+            return Ok((item.file.clone(), item.line));
+        }
+    }
+    parse_location(location)
+}
+
 /// Parse a location string like "file.rs:42" into (file, line).
 pub fn parse_location(location: &str) -> Result<(String, usize)> {
     let parts: Vec<&str> = location.rsplitn(2, ':').collect();
@@ -251,6 +263,59 @@ mod tests {
 
         assert_eq!(ctx.before.len(), 0);
         assert_eq!(ctx.after.len(), 0);
+    }
+
+    #[test]
+    fn test_resolve_location_matches_id() {
+        let items = vec![TodoItem {
+            file: "src/main.rs".to_string(),
+            line: 42,
+            tag: crate::model::Tag::Todo,
+            message: "fix this bug".to_string(),
+            author: None,
+            issue_ref: None,
+            priority: crate::model::Priority::Normal,
+            deadline: None,
+        }];
+        let (file, line) = resolve_location("src/main.rs:TODO:fix this bug", &items).unwrap();
+        assert_eq!(file, "src/main.rs");
+        assert_eq!(line, 42);
+    }
+
+    #[test]
+    fn test_resolve_location_falls_back_to_file_line() {
+        let items = vec![TodoItem {
+            file: "src/main.rs".to_string(),
+            line: 42,
+            tag: crate::model::Tag::Todo,
+            message: "fix this bug".to_string(),
+            author: None,
+            issue_ref: None,
+            priority: crate::model::Priority::Normal,
+            deadline: None,
+        }];
+        // No ID match, falls back to parse_location
+        let (file, line) = resolve_location("src/lib.rs:10", &items).unwrap();
+        assert_eq!(file, "src/lib.rs");
+        assert_eq!(line, 10);
+    }
+
+    #[test]
+    fn test_resolve_location_id_takes_priority() {
+        // If location looks like an ID and matches, use the matched item's line
+        let items = vec![TodoItem {
+            file: "src/main.rs".to_string(),
+            line: 99,
+            tag: crate::model::Tag::Fixme,
+            message: "urgent problem".to_string(),
+            author: None,
+            issue_ref: None,
+            priority: crate::model::Priority::Normal,
+            deadline: None,
+        }];
+        let (file, line) = resolve_location("src/main.rs:FIXME:urgent problem", &items).unwrap();
+        assert_eq!(file, "src/main.rs");
+        assert_eq!(line, 99);
     }
 
     #[test]

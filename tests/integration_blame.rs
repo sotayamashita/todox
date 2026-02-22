@@ -276,3 +276,19 @@ fn test_blame_empty_repo() {
         .success()
         .stdout(predicate::str::contains("0 items"));
 }
+
+#[test]
+fn test_blame_json_contains_id_field() {
+    let dir = setup_git_repo(&[("main.rs", "// TODO: blame id test\nfn main() {}\n")]);
+    let cwd = dir.path();
+
+    let output = todox()
+        .args(["blame", "--root", cwd.to_str().unwrap(), "--format", "json"])
+        .output()
+        .unwrap();
+
+    let stdout = String::from_utf8(output.stdout).unwrap();
+    let json: serde_json::Value = serde_json::from_str(&stdout).unwrap();
+    let entry = &json["entries"][0];
+    assert_eq!(entry["id"].as_str().unwrap(), "main.rs:TODO:blame id test");
+}

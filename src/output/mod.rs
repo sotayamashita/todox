@@ -13,9 +13,12 @@ use crate::model::*;
 use std::path::Path;
 
 /// Apply detail-level transformations to a flat JSON item (TodoItem-shaped object).
+/// - Always: inject stable `id` field
 /// - Minimal: remove author, issue_ref, priority, deadline
-/// - Full: inject match_key
+/// - Full: inject match_key (backward compatibility)
 fn apply_detail_to_json_item(item_val: &mut serde_json::Value, detail: &DetailLevel) {
+    inject_id_field(item_val);
+
     if *detail == DetailLevel::Minimal {
         let obj = item_val.as_object_mut().unwrap();
         obj.remove("author");
@@ -24,26 +27,11 @@ fn apply_detail_to_json_item(item_val: &mut serde_json::Value, detail: &DetailLe
         obj.remove("deadline");
     }
     if *detail == DetailLevel::Full {
-        let file = item_val
-            .get("file")
-            .and_then(|v| v.as_str())
-            .unwrap_or("")
-            .to_string();
-        let tag = item_val
-            .get("tag")
-            .and_then(|v| v.as_str())
-            .unwrap_or("")
-            .to_string();
-        let message = item_val
-            .get("message")
-            .and_then(|v| v.as_str())
-            .unwrap_or("")
-            .to_string();
-        let match_key = format!("{}:{}:{}", file, tag, message.trim().to_lowercase());
-        item_val.as_object_mut().unwrap().insert(
-            "match_key".to_string(),
-            serde_json::Value::String(match_key),
-        );
+        let id = item_val["id"].as_str().unwrap_or("").to_string();
+        item_val
+            .as_object_mut()
+            .unwrap()
+            .insert("match_key".to_string(), serde_json::Value::String(id));
     }
 }
 
@@ -779,13 +767,43 @@ pub fn print_blame(result: &BlameResult, format: &Format) {
             );
         }
         Format::Json => {
-            let json = serde_json::to_string_pretty(result).expect("failed to serialize");
+            let mut value: serde_json::Value =
+                serde_json::to_value(result).expect("failed to serialize");
+            if let Some(entries) = value.get_mut("entries").and_then(|v| v.as_array_mut()) {
+                for entry_val in entries.iter_mut() {
+                    inject_id_field(entry_val);
+                }
+            }
+            let json = serde_json::to_string_pretty(&value).expect("failed to serialize");
             println!("{}", json);
         }
         Format::GithubActions => print!("{}", github_actions::format_blame(result)),
         Format::Sarif => print!("{}", sarif::format_blame(result)),
         Format::Markdown => print!("{}", markdown::format_blame(result)),
     }
+}
+
+/// Inject a stable `id` field into a JSON object that has flattened TodoItem fields.
+fn inject_id_field(val: &mut serde_json::Value) {
+    let file = val
+        .get("file")
+        .and_then(|v| v.as_str())
+        .unwrap_or("")
+        .to_string();
+    let tag = val
+        .get("tag")
+        .and_then(|v| v.as_str())
+        .unwrap_or("")
+        .to_string();
+    let message = val
+        .get("message")
+        .and_then(|v| v.as_str())
+        .unwrap_or("")
+        .to_string();
+    let id = format!("{}:{}:{}", file, tag, message.trim().to_lowercase());
+    val.as_object_mut()
+        .unwrap()
+        .insert("id".to_string(), serde_json::Value::String(id));
 }
 
 pub fn print_context(rich: &RichContext, format: &Format) {

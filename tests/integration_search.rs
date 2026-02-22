@@ -290,3 +290,25 @@ fn test_search_detail_minimal_json() {
         "issue_ref should not be in minimal search JSON"
     );
 }
+
+#[test]
+fn test_search_json_contains_id_field() {
+    let dir = setup_project(&[("main.rs", "// TODO: search id test\n// FIXME: other\n")]);
+
+    let output = todox()
+        .args([
+            "search",
+            "search id",
+            "--root",
+            dir.path().to_str().unwrap(),
+            "--format",
+            "json",
+        ])
+        .output()
+        .unwrap();
+
+    let stdout = String::from_utf8(output.stdout).unwrap();
+    let json: serde_json::Value = serde_json::from_str(&stdout).unwrap();
+    let item = &json["items"][0];
+    assert_eq!(item["id"].as_str().unwrap(), "main.rs:TODO:search id test");
+}
