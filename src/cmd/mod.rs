@@ -3,6 +3,7 @@ mod check;
 mod clean;
 mod context;
 mod diff;
+mod filter;
 mod lint;
 mod list;
 mod relate;

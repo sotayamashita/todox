@@ -7,11 +7,11 @@ use crate::config::Config;
 use crate::context::collect_context_map;
 use crate::diff::compute_diff;
 use crate::model;
-use crate::model::Tag;
 use crate::output::print_tasks;
 use crate::tasks;
 
 use super::do_scan;
+use super::filter::{apply_filters, FilterOptions};
 
 pub struct TasksOptions {
     pub tag: Vec<String>,
@@ -45,35 +45,15 @@ pub fn cmd_tasks(
         scan.items
     };
 
-    // Apply tag filter
-    if !opts.tag.is_empty() {
-        let filter_tags: Vec<Tag> = opts
-            .tag
-            .iter()
-            .filter_map(|s| s.parse::<Tag>().ok())
-            .collect();
-        items.retain(|item| filter_tags.contains(&item.tag));
-    }
-
-    // Apply priority filter
-    if !opts.priority.is_empty() {
-        let priorities: Vec<model::Priority> =
-            opts.priority.iter().map(|p| p.to_priority()).collect();
-        items.retain(|item| priorities.contains(&item.priority));
-    }
-
-    // Apply author filter
-    if let Some(ref author) = opts.author {
-        items.retain(|item| item.author.as_deref() == Some(author.as_str()));
-    }
-
-    // Apply path filter
-    if let Some(ref pattern) = opts.path {
-        let glob = globset::Glob::new(pattern)
-            .context("invalid glob pattern")?
-            .compile_matcher();
-        items.retain(|item| glob.is_match(&item.file));
-    }
+    apply_filters(
+        &mut items,
+        &FilterOptions {
+            tags: opts.tag,
+            author: opts.author,
+            path: opts.path,
+            priority: opts.priority,
+        },
+    )?;
 
     // Sort by priority
     tasks::sort_by_priority(&mut items);
