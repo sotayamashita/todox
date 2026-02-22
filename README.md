@@ -33,11 +33,17 @@ Track TODO/FIXME/HACK comments in your codebase with git-aware diff and CI gate.
 
 ### Scan & List TODOs
 
-🔥 **Problem** — TODO comments scatter across hundreds of files, making it hard to know what's outstanding.
+🔥 **Problem**
 
-🌱 **Solution** — `todox list` scans your entire codebase and displays every TODO, FIXME, HACK, XXX, BUG, and NOTE comment with color-coded tags, flexible grouping (`--group-by file|tag|priority|author|dir`), and filtering by priority, author, path glob, and result limit.
+TODO comments scatter across hundreds of files, making it hard to know what's outstanding.
 
-🎁 **Outcome** — One command gives you a complete, filterable inventory of all technical debt markers in your project.
+🌱 **Solution**
+
+`todox list` scans your entire codebase and displays every TODO, FIXME, HACK, XXX, BUG, and NOTE comment with color-coded tags, flexible grouping (`--group-by file|tag|priority|author|dir`), and filtering by priority, author, path glob, and result limit.
+
+🎁 **Outcome**
+
+One command gives you a complete, filterable inventory of all technical debt markers in your project.
 
 ```sh
 todox list --group-by tag --priority high
@@ -45,11 +51,17 @@ todox list --group-by tag --priority high
 
 ### Search TODOs
 
-🔥 **Problem** — Scrolling through `todox list` output or manually grepping to find specific TODOs is impractical in large codebases with hundreds of items.
+🔥 **Problem**
 
-🌱 **Solution** — `todox search` filters TODO comments by message text or issue reference using case-insensitive substring matching, with `--exact` for case-sensitive searches and `-C` for context lines.
+Scrolling through `todox list` output or manually grepping to find specific TODOs is impractical in large codebases with hundreds of items.
 
-🎁 **Outcome** — You can instantly find relevant TODOs without scrolling through hundreds of items.
+🌱 **Solution**
+
+`todox search` filters TODO comments by message text or issue reference using case-insensitive substring matching, with `--exact` for case-sensitive searches and `-C` for context lines.
+
+🎁 **Outcome**
+
+You can instantly find relevant TODOs without scrolling through hundreds of items.
 
 ```sh
 todox search "migration" --author alice
@@ -57,11 +69,17 @@ todox search "migration" --author alice
 
 ### Inline Code Context
 
-🔥 **Problem** — TODO lists show file:line references but lack surrounding code, forcing you to open files to understand what each TODO refers to.
+🔥 **Problem**
 
-🌱 **Solution** — `todox context` displays the code around a specific line with related TODOs in the same file, and the `-C N` flag on `list` and `diff` adds inline context to every item.
+TODO lists show file:line references but lack surrounding code, forcing you to open files to understand what each TODO refers to.
 
-🎁 **Outcome** — You understand what each TODO refers to without leaving the terminal.
+🌱 **Solution**
+
+`todox context` displays the code around a specific line with related TODOs in the same file, and the `-C N` flag on `list` and `diff` adds inline context to every item.
+
+🎁 **Outcome**
+
+You understand what each TODO refers to without leaving the terminal.
 
 ```sh
 todox context src/main.rs:25 -C 3
@@ -69,11 +87,17 @@ todox context src/main.rs:25 -C 3
 
 ### Diff Against Git Refs
 
-🔥 **Problem** — New TODOs slip into pull requests unnoticed while resolved ones go unrecognized.
+🔥 **Problem**
 
-🌱 **Solution** — `todox diff` compares the current working tree against any git ref and shows exactly which TODOs were added or removed.
+New TODOs slip into pull requests unnoticed while resolved ones go unrecognized.
 
-🎁 **Outcome** — Every PR review shows precisely what TODO debt changed, making it impossible to sneak in untracked work.
+🌱 **Solution**
+
+`todox diff` compares the current working tree against any git ref and shows exactly which TODOs were added or removed.
+
+🎁 **Outcome**
+
+Every PR review shows precisely what TODO debt changed, making it impossible to sneak in untracked work.
 
 ```sh
 todox diff main
@@ -81,11 +105,17 @@ todox diff main
 
 ### Dashboard & Statistics
 
-🔥 **Problem** — A flat list of TODOs makes it hard to see the big picture — whether tech debt is growing, who owns the most items, and which files are hotspots.
+🔥 **Problem**
 
-🌱 **Solution** — `todox stats` provides a dashboard summary with tag and author breakdowns, priority distribution, and top files by TODO count, with `--since <ref>` for trend analysis.
+A flat list of TODOs makes it hard to see the big picture — whether tech debt is growing, who owns the most items, and which files are hotspots.
 
-🎁 **Outcome** — You get an at-a-glance view of your project's technical debt health and trends.
+🌱 **Solution**
+
+`todox stats` provides a dashboard summary with tag and author breakdowns, priority distribution, and top files by TODO count, with `--since <ref>` for trend analysis.
+
+🎁 **Outcome**
+
+You get an at-a-glance view of your project's technical debt health and trends.
 
 ```sh
 todox stats --since main
@@ -93,11 +123,17 @@ todox stats --since main
 
 ### Git Blame Integration
 
-🔥 **Problem** — TODO comments lack accountability — you can't tell who wrote them or when without manually running `git blame`.
+🔥 **Problem**
 
-🌱 **Solution** — `todox blame` enriches each TODO with git blame metadata including author, commit date, and age in days, and flags items older than a configurable threshold as stale.
+TODO comments lack accountability — you can't tell who wrote them or when without manually running `git blame`.
 
-🎁 **Outcome** — Every TODO has clear ownership and age, making it easy to prioritize and assign cleanup work.
+🌱 **Solution**
+
+`todox blame` enriches each TODO with git blame metadata including author, commit date, and age in days, and flags items older than a configurable threshold as stale.
+
+🎁 **Outcome**
+
+Every TODO has clear ownership and age, making it easy to prioritize and assign cleanup work.
 
 ```sh
 todox blame --sort age --min-age 90d
@@ -105,11 +141,17 @@ todox blame --sort age --min-age 90d
 
 ### Discover TODO Relationships
 
-🔥 **Problem** — TODOs in large codebases form implicit dependency chains, but existing tools treat each item in isolation.
+🔥 **Problem**
 
-🌱 **Solution** — `todox relate` discovers relationships between TODO comments using same-file proximity, shared keywords, cross-references (same issue or author), and tag similarity, scoring each pair on a 0–1 scale.
+TODOs in large codebases form implicit dependency chains, but existing tools treat each item in isolation.
 
-🎁 **Outcome** — Related TODOs surface as actionable clusters, revealing hidden patterns in your technical debt.
+🌱 **Solution**
+
+`todox relate` discovers relationships between TODO comments using same-file proximity, shared keywords, cross-references (same issue or author), and tag similarity, scoring each pair on a 0–1 scale.
+
+🎁 **Outcome**
+
+Related TODOs surface as actionable clusters, revealing hidden patterns in your technical debt.
 
 ```sh
 todox relate --cluster
@@ -117,11 +159,17 @@ todox relate --cluster
 
 ### Lint TODO Format
 
-🔥 **Problem** — TODO comments in team codebases drift in format — inconsistent casing, missing colons, missing authors — degrading scanner reliability and code hygiene.
+🔥 **Problem**
 
-🌱 **Solution** — `todox lint` enforces configurable formatting rules (uppercase tags, colons, author attribution, issue references, message length) and exits with code 1 on violations, making it CI-ready out of the box.
+TODO comments in team codebases drift in format — inconsistent casing, missing colons, missing authors — degrading scanner reliability and code hygiene.
 
-🎁 **Outcome** — Every TODO in your codebase follows consistent formatting, improving both machine parseability and human readability.
+🌱 **Solution**
+
+`todox lint` enforces configurable formatting rules (uppercase tags, colons, author attribution, issue references, message length) and exits with code 1 on violations, making it CI-ready out of the box.
+
+🎁 **Outcome**
+
+Every TODO in your codebase follows consistent formatting, improving both machine parseability and human readability.
 
 ```sh
 todox lint --require-author TODO,FIXME
@@ -129,11 +177,17 @@ todox lint --require-author TODO,FIXME
 
 ### Clean Stale & Duplicate TODOs
 
-🔥 **Problem** — TODOs accumulate faster than they resolve, and no amount of listing or linting reduces the pile.
+🔥 **Problem**
 
-🌱 **Solution** — `todox clean` identifies TODOs referencing closed GitHub issues (stale) and those with identical messages across files (duplicates).
+TODOs accumulate faster than they resolve, and no amount of listing or linting reduces the pile.
 
-🎁 **Outcome** — You get an actionable cleanup list that targets the lowest-hanging fruit first.
+🌱 **Solution**
+
+`todox clean` identifies TODOs referencing closed GitHub issues (stale) and those with identical messages across files (duplicates).
+
+🎁 **Outcome**
+
+You get an actionable cleanup list that targets the lowest-hanging fruit first.
 
 ```sh
 todox clean --check
@@ -141,11 +195,17 @@ todox clean --check
 
 ### CI Quality Gate
 
-🔥 **Problem** — Without enforcement, TODO debt grows silently until it becomes unmanageable.
+🔥 **Problem**
 
-🌱 **Solution** — `todox check` acts as a CI gate that fails the build when TODO counts exceed a threshold, forbidden tags appear, too many new TODOs are introduced, or deadlines have expired.
+Without enforcement, TODO debt grows silently until it becomes unmanageable.
 
-🎁 **Outcome** — Your CI pipeline automatically prevents TODO debt from spiraling out of control.
+🌱 **Solution**
+
+`todox check` acts as a CI gate that fails the build when TODO counts exceed a threshold, forbidden tags appear, too many new TODOs are introduced, or deadlines have expired.
+
+🎁 **Outcome**
+
+Your CI pipeline automatically prevents TODO debt from spiraling out of control.
 
 ```sh
 todox check --max 100 --block-tags BUG
@@ -153,11 +213,17 @@ todox check --max 100 --block-tags BUG
 
 ### Workspace-Aware Scanning
 
-🔥 **Problem** — Monorepos lack per-package TODO visibility — you can't tell which packages are accumulating debt without manually scanning each one.
+🔥 **Problem**
 
-🌱 **Solution** — `todox workspace list` auto-detects your workspace format (Cargo, npm, pnpm, Nx, Go workspaces), scans each package independently, and displays a summary table with TODO counts, configured thresholds, and pass/fail status.
+Monorepos lack per-package TODO visibility — you can't tell which packages are accumulating debt without manually scanning each one.
 
-🎁 **Outcome** — Every package's TODO health is visible at a glance, making it easy to spot where debt concentrates.
+🌱 **Solution**
+
+`todox workspace list` auto-detects your workspace format (Cargo, npm, pnpm, Nx, Go workspaces), scans each package independently, and displays a summary table with TODO counts, configured thresholds, and pass/fail status.
+
+🎁 **Outcome**
+
+Every package's TODO health is visible at a glance, making it easy to spot where debt concentrates.
 
 ```sh
 todox workspace list
@@ -165,11 +231,17 @@ todox workspace list
 
 ### Per-Package CI Gate
 
-🔥 **Problem** — A single global `--max` threshold doesn't work for monorepos where packages have different maturity levels.
+🔥 **Problem**
 
-🌱 **Solution** — `todox check --workspace` evaluates per-package thresholds defined in `[workspace.packages.<name>]` config sections, failing the build if any package exceeds its individual limit or uses forbidden tags.
+A single global `--max` threshold doesn't work for monorepos where packages have different maturity levels.
 
-🎁 **Outcome** — Each package enforces its own TODO budget, matching reality instead of a one-size-fits-all limit.
+🌱 **Solution**
+
+`todox check --workspace` evaluates per-package thresholds defined in `[workspace.packages.<name>]` config sections, failing the build if any package exceeds its individual limit or uses forbidden tags.
+
+🎁 **Outcome**
+
+Each package enforces its own TODO budget, matching reality instead of a one-size-fits-all limit.
 
 ```sh
 todox check --workspace
@@ -177,11 +249,17 @@ todox check --workspace
 
 ### Single Package Scope
 
-🔥 **Problem** — Sometimes you only need to see TODOs in one package without the noise from the rest of the monorepo.
+🔥 **Problem**
 
-🌱 **Solution** — The `--package` flag on `list`, `check`, and `diff` scopes the scan to a single workspace package.
+Sometimes you only need to see TODOs in one package without the noise from the rest of the monorepo.
 
-🎁 **Outcome** — You get focused results for just the package you're working on.
+🌱 **Solution**
+
+The `--package` flag on `list`, `check`, and `diff` scopes the scan to a single workspace package.
+
+🎁 **Outcome**
+
+You get focused results for just the package you're working on.
 
 ```sh
 todox list --package core
@@ -189,11 +267,17 @@ todox list --package core
 
 ### HTML Report Generation
 
-🔥 **Problem** — Presenting TODO metrics to stakeholders requires manual data collection and slide preparation.
+🔥 **Problem**
 
-🌱 **Solution** — `todox report` generates a self-contained HTML dashboard with summary cards, trend charts from git history, tag/priority/age distribution, author breakdowns, and a sortable items table — zero external dependencies.
+Presenting TODO metrics to stakeholders requires manual data collection and slide preparation.
 
-🎁 **Outcome** — You get a shareable, presentation-ready report droppable into any CI pipeline as an artifact.
+🌱 **Solution**
+
+`todox report` generates a self-contained HTML dashboard with summary cards, trend charts from git history, tag/priority/age distribution, author breakdowns, and a sortable items table — zero external dependencies.
+
+🎁 **Outcome**
+
+You get a shareable, presentation-ready report droppable into any CI pipeline as an artifact.
 
 ```sh
 todox report --output debt.html --history 20
@@ -201,11 +285,17 @@ todox report --output debt.html --history 20
 
 ### CI Output Formats
 
-🔥 **Problem** — Plain text output requires extra tooling to integrate with CI dashboards and PR workflows.
+🔥 **Problem**
 
-🌱 **Solution** — todox supports `--format github-actions` for inline PR annotations, `--format sarif` for GitHub's [Code Scanning](https://docs.github.com/en/code-security/code-scanning) tab via SARIF, and `--format markdown` for PR comment bot tables.
+Plain text output requires extra tooling to integrate with CI dashboards and PR workflows.
 
-🎁 **Outcome** — todox integrates natively with your CI pipeline without any glue scripts.
+🌱 **Solution**
+
+todox supports `--format github-actions` for inline PR annotations, `--format sarif` for GitHub's [Code Scanning](https://docs.github.com/en/code-security/code-scanning) tab via SARIF, and `--format markdown` for PR comment bot tables.
+
+🎁 **Outcome**
+
+todox integrates natively with your CI pipeline without any glue scripts.
 
 ```sh
 todox list --format github-actions
@@ -213,11 +303,17 @@ todox list --format github-actions
 
 ### Claude Code Task Export
 
-🔥 **Problem** — Bridging TODO scanning with AI task orchestration requires manually parsing `todox list --format json` output and constructing TaskCreate calls.
+🔥 **Problem**
 
-🌱 **Solution** — `todox tasks` exports scanned TODOs as Claude Code Task-compatible JSON with action-verb subjects, code context in descriptions, and priority-based ordering.
+Bridging TODO scanning with AI task orchestration requires manually parsing `todox list --format json` output and constructing TaskCreate calls.
 
-🎁 **Outcome** — Your TODOs become AI-assignable tasks with a single command.
+🌱 **Solution**
+
+`todox tasks` exports scanned TODOs as Claude Code Task-compatible JSON with action-verb subjects, code context in descriptions, and priority-based ordering.
+
+🎁 **Outcome**
+
+Your TODOs become AI-assignable tasks with a single command.
 
 ```sh
 todox tasks --dry-run
@@ -225,11 +321,17 @@ todox tasks --dry-run
 
 ### Real-time File Watching
 
-🔥 **Problem** — Re-running `todox list` after every edit breaks flow when actively cleaning up TODO debt.
+🔥 **Problem**
 
-🌱 **Solution** — `todox watch` monitors the filesystem and shows real-time TODO additions and removals as files change, with optional `--max` threshold warnings.
+Re-running `todox list` after every edit breaks flow when actively cleaning up TODO debt.
 
-🎁 **Outcome** — You see the impact of your cleanup work instantly without switching context.
+🌱 **Solution**
+
+`todox watch` monitors the filesystem and shows real-time TODO additions and removals as files change, with optional `--max` threshold warnings.
+
+🎁 **Outcome**
+
+You see the impact of your cleanup work instantly without switching context.
 
 ```sh
 todox watch
@@ -237,11 +339,17 @@ todox watch
 
 ### Interactive Setup
 
-🔥 **Problem** — New users must manually create `.todox.toml` from documentation, slowing onboarding.
+🔥 **Problem**
 
-🌱 **Solution** — `todox init` walks you through an interactive setup that detects your project type (Rust, Node, Go, Python), suggests appropriate exclude directories, and lets you choose which tags to track.
+New users must manually create `.todox.toml` from documentation, slowing onboarding.
 
-🎁 **Outcome** — You go from zero to a working configuration in seconds, not minutes of documentation reading.
+🌱 **Solution**
+
+`todox init` walks you through an interactive setup that detects your project type (Rust, Node, Go, Python), suggests appropriate exclude directories, and lets you choose which tags to track.
+
+🎁 **Outcome**
+
+You go from zero to a working configuration in seconds, not minutes of documentation reading.
 
 ```sh
 todox init
@@ -249,11 +357,17 @@ todox init
 
 ### Shell Completions
 
-🔥 **Problem** — Shell completions are table stakes for CLI tools but require manual setup.
+🔥 **Problem**
 
-🌱 **Solution** — `todox completions` generates completion scripts for bash, zsh, fish, elvish, and PowerShell and outputs them to stdout for easy installation.
+Shell completions are table stakes for CLI tools but require manual setup.
 
-🎁 **Outcome** — Tab completion works out of the box for every major shell.
+🌱 **Solution**
+
+`todox completions` generates completion scripts for bash, zsh, fish, elvish, and PowerShell and outputs them to stdout for easy installation.
+
+🎁 **Outcome**
+
+Tab completion works out of the box for every major shell.
 
 ```sh
 todox completions fish > ~/.config/fish/completions/todox.fish
