@@ -1,8 +1,8 @@
-/// Shared date/time utility functions.
-///
-/// Centralises calendar arithmetic (Howard Hinnant's civil calendar algorithms)
-/// and ISO-8601 formatting that were previously duplicated across blame, report,
-/// clean, and watch modules.
+//! Shared date/time utility functions.
+//!
+//! Centralises calendar arithmetic (Howard Hinnant's civil calendar algorithms)
+//! and ISO-8601 formatting that were previously duplicated across blame, report,
+//! clean, and watch modules.
 
 /// Convert days since Unix epoch to (year, month, day).
 ///
