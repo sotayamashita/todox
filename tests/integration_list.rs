@@ -867,3 +867,80 @@ fn test_list_detail_full_text_auto_context() {
         .stdout(predicate::str::contains("TODO"))
         .stdout(predicate::str::contains("let y = 2"));
 }
+
+#[test]
+fn test_list_json_contains_id_field_at_normal_detail() {
+    let dir = setup_project(&[("main.rs", "// TODO: stable id test\n")]);
+
+    let output = todox()
+        .args([
+            "list",
+            "--root",
+            dir.path().to_str().unwrap(),
+            "--format",
+            "json",
+        ])
+        .output()
+        .unwrap();
+
+    let stdout = String::from_utf8(output.stdout).unwrap();
+    let json: serde_json::Value = serde_json::from_str(&stdout).unwrap();
+    let items = json["items"].as_array().unwrap();
+    assert_eq!(items.len(), 1);
+    let item = &items[0];
+    assert_eq!(item["id"].as_str().unwrap(), "main.rs:TODO:stable id test");
+}
+
+#[test]
+fn test_list_json_contains_id_field_at_minimal_detail() {
+    let dir = setup_project(&[("main.rs", "// TODO: minimal id test\n")]);
+
+    let output = todox()
+        .args([
+            "list",
+            "--root",
+            dir.path().to_str().unwrap(),
+            "--format",
+            "json",
+            "--detail",
+            "minimal",
+        ])
+        .output()
+        .unwrap();
+
+    let stdout = String::from_utf8(output.stdout).unwrap();
+    let json: serde_json::Value = serde_json::from_str(&stdout).unwrap();
+    let item = &json["items"][0];
+    assert!(
+        item["id"].is_string(),
+        "id field must be present in minimal detail"
+    );
+}
+
+#[test]
+fn test_list_json_full_detail_has_both_id_and_match_key() {
+    let dir = setup_project(&[("main.rs", "// TODO: full detail test\n")]);
+
+    let output = todox()
+        .args([
+            "list",
+            "--root",
+            dir.path().to_str().unwrap(),
+            "--format",
+            "json",
+            "--detail",
+            "full",
+        ])
+        .output()
+        .unwrap();
+
+    let stdout = String::from_utf8(output.stdout).unwrap();
+    let json: serde_json::Value = serde_json::from_str(&stdout).unwrap();
+    let item = &json["items"][0];
+    assert!(item["id"].is_string(), "id field must be present");
+    assert!(
+        item["match_key"].is_string(),
+        "match_key must still be present in full detail"
+    );
+    assert_eq!(item["id"].as_str(), item["match_key"].as_str());
+}

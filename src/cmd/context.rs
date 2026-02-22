@@ -4,7 +4,7 @@ use anyhow::Result;
 
 use crate::cli::Format;
 use crate::config::Config;
-use crate::context::{build_rich_context, parse_location};
+use crate::context::{build_rich_context, resolve_location};
 use crate::model;
 use crate::output::print_context;
 
@@ -18,10 +18,10 @@ pub fn cmd_context(
     n: usize,
     no_cache: bool,
 ) -> Result<()> {
-    let (file, line) = parse_location(location)?;
-
-    // Scan to find related TODOs in the same file
+    // Scan first so we have items available for ID-based resolution
     let scan = do_scan(root, config, no_cache)?;
+    let (file, line) = resolve_location(location, &scan.items)?;
+
     let todos_in_file: Vec<&model::TodoItem> =
         scan.items.iter().filter(|i| i.file == file).collect();
 

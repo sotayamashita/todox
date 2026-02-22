@@ -109,6 +109,12 @@ impl TodoItem {
         let normalized = self.message.trim().to_lowercase();
         format!("{}:{}:{}", self.file, self.tag, normalized)
     }
+
+    /// Stable, content-based identifier for this TODO item.
+    /// Unlike `file:line`, this ID survives line-number changes from edits.
+    pub fn id(&self) -> String {
+        self.match_key()
+    }
 }
 
 #[derive(Debug, Serialize)]
@@ -463,6 +469,21 @@ pub struct RelateResult {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn id_returns_same_value_as_match_key() {
+        let item = TodoItem {
+            file: "src/main.rs".to_string(),
+            line: 42,
+            tag: Tag::Todo,
+            message: "fix this bug".to_string(),
+            author: None,
+            issue_ref: None,
+            priority: Priority::Normal,
+            deadline: None,
+        };
+        assert_eq!(item.id(), item.match_key());
+    }
 
     #[test]
     fn priority_numeric_order_values() {
