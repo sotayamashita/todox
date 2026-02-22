@@ -1,16 +1,16 @@
 use std::collections::{HashMap, HashSet};
 use std::path::Path;
 
-use anyhow::{Context, Result};
+use anyhow::Result;
 
 use crate::cli::{Format, GroupBy, SortBy};
 use crate::config::Config;
 use crate::context::collect_context_map;
-use crate::model::Tag;
 use crate::output::print_search;
 use crate::search::search_items;
 
 use super::do_scan;
+use super::filter::{apply_filters, FilterOptions};
 
 pub struct SearchOptions {
     pub query: String,
@@ -33,30 +33,15 @@ pub fn cmd_search(
     let scan = do_scan(root, config, no_cache)?;
     let mut result = search_items(&scan, &opts.query, opts.exact);
 
-    // Apply tag filter
-    if !opts.tag.is_empty() {
-        let filter_tags: Vec<Tag> = opts
-            .tag
-            .iter()
-            .filter_map(|s| s.parse::<Tag>().ok())
-            .collect();
-        result.items.retain(|item| filter_tags.contains(&item.tag));
-    }
-
-    // Apply author filter
-    if let Some(ref author) = opts.author {
-        result
-            .items
-            .retain(|item| item.author.as_deref() == Some(author.as_str()));
-    }
-
-    // Apply path filter
-    if let Some(ref pattern) = opts.path {
-        let glob = globset::Glob::new(pattern)
-            .context("invalid glob pattern")?
-            .compile_matcher();
-        result.items.retain(|item| glob.is_match(&item.file));
-    }
+    apply_filters(
+        &mut result.items,
+        &FilterOptions {
+            tags: opts.tag,
+            author: opts.author,
+            path: opts.path,
+            priority: vec![],
+        },
+    )?;
 
     // Apply sort
     match opts.sort {
