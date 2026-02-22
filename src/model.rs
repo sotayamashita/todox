@@ -352,6 +352,7 @@ pub enum WorkspaceKind {
     Npm,
     Pnpm,
     Nx,
+    #[serde(rename = "go")]
     GoWork,
     Manual,
 }
@@ -425,7 +426,7 @@ mod tests {
         let json = serde_json::to_string(&WorkspaceKind::Cargo).unwrap();
         assert_eq!(json, "\"cargo\"");
         let json = serde_json::to_string(&WorkspaceKind::GoWork).unwrap();
-        assert_eq!(json, "\"gowork\"");
+        assert_eq!(json, "\"go\"");
     }
 
     #[test]
