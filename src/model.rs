@@ -61,12 +61,34 @@ impl fmt::Display for Tag {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum Priority {
     Normal,
     High,
     Urgent,
+}
+
+impl Priority {
+    pub fn numeric_order(&self) -> u8 {
+        match self {
+            Priority::Urgent => 2,
+            Priority::High => 1,
+            Priority::Normal => 0,
+        }
+    }
+}
+
+impl PartialOrd for Priority {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for Priority {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.numeric_order().cmp(&other.numeric_order())
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -439,6 +461,37 @@ pub struct RelateResult {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn priority_numeric_order_values() {
+        assert_eq!(Priority::Normal.numeric_order(), 0);
+        assert_eq!(Priority::High.numeric_order(), 1);
+        assert_eq!(Priority::Urgent.numeric_order(), 2);
+    }
+
+    #[test]
+    fn priority_ord_urgent_gt_high_gt_normal() {
+        assert!(Priority::Urgent > Priority::High);
+        assert!(Priority::High > Priority::Normal);
+        assert!(Priority::Urgent > Priority::Normal);
+    }
+
+    #[test]
+    fn priority_ord_equality() {
+        assert_eq!(Priority::Normal, Priority::Normal);
+        assert_eq!(Priority::High, Priority::High);
+        assert_eq!(Priority::Urgent, Priority::Urgent);
+    }
+
+    #[test]
+    fn priority_ord_sorting() {
+        let mut priorities = vec![Priority::Normal, Priority::Urgent, Priority::High];
+        priorities.sort();
+        assert_eq!(
+            priorities,
+            vec![Priority::Normal, Priority::High, Priority::Urgent]
+        );
+    }
 
     #[test]
     fn workspace_kind_display() {

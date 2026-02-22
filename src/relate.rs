@@ -1,6 +1,6 @@
 use std::collections::{HashMap, HashSet};
 
-use crate::model::{Cluster, Priority, RelateResult, Relationship, ScanResult, TodoItem};
+use crate::model::{Cluster, RelateResult, Relationship, ScanResult, TodoItem};
 
 const STOPWORDS: &[&str] = &[
     "a", "an", "the", "is", "it", "in", "to", "of", "for", "on", "and", "or", "but", "not", "with",
@@ -280,15 +280,8 @@ pub fn generate_theme(items: &[&TodoItem]) -> String {
 
 pub fn compute_suggested_order(items: &mut [&TodoItem]) {
     items.sort_by(|a, b| {
-        let priority_ord = |p: &Priority| -> u8 {
-            match p {
-                Priority::Urgent => 0,
-                Priority::High => 1,
-                Priority::Normal => 2,
-            }
-        };
-        priority_ord(&a.priority)
-            .cmp(&priority_ord(&b.priority))
+        b.priority
+            .cmp(&a.priority)
             .then(b.tag.severity().cmp(&a.tag.severity()))
             .then(a.file.cmp(&b.file))
             .then(a.line.cmp(&b.line))

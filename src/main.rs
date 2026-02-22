@@ -375,17 +375,8 @@ fn cmd_search(
                 .then(a.line.cmp(&b.line))
         }),
         SortBy::Priority => result.items.sort_by(|a, b| {
-            let pa = match a.priority {
-                model::Priority::Urgent => 2,
-                model::Priority::High => 1,
-                model::Priority::Normal => 0,
-            };
-            let pb = match b.priority {
-                model::Priority::Urgent => 2,
-                model::Priority::High => 1,
-                model::Priority::Normal => 0,
-            };
-            pb.cmp(&pa)
+            b.priority
+                .cmp(&a.priority)
                 .then(a.file.cmp(&b.file))
                 .then(a.line.cmp(&b.line))
         }),
@@ -467,17 +458,8 @@ fn cmd_list(
                 .then(a.line.cmp(&b.line))
         }),
         SortBy::Priority => result.items.sort_by(|a, b| {
-            let pa = match a.priority {
-                model::Priority::Urgent => 2,
-                model::Priority::High => 1,
-                model::Priority::Normal => 0,
-            };
-            let pb = match b.priority {
-                model::Priority::Urgent => 2,
-                model::Priority::High => 1,
-                model::Priority::Normal => 0,
-            };
-            pb.cmp(&pa)
+            b.priority
+                .cmp(&a.priority)
                 .then(a.file.cmp(&b.file))
                 .then(a.line.cmp(&b.line))
         }),

@@ -131,17 +131,8 @@ pub fn build_tasks(
 /// Sort items by priority (Urgent > High > Normal), then tag severity, then file/line.
 pub fn sort_by_priority(items: &mut [TodoItem]) {
     items.sort_by(|a, b| {
-        let pa = match a.priority {
-            Priority::Urgent => 2,
-            Priority::High => 1,
-            Priority::Normal => 0,
-        };
-        let pb = match b.priority {
-            Priority::Urgent => 2,
-            Priority::High => 1,
-            Priority::Normal => 0,
-        };
-        pb.cmp(&pa)
+        b.priority
+            .cmp(&a.priority)
             .then(b.tag.severity().cmp(&a.tag.severity()))
             .then(a.file.cmp(&b.file))
             .then(a.line.cmp(&b.line))
