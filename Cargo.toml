@@ -43,7 +43,7 @@ notify = "7"
 notify-debouncer-mini = "0.5"
 ctrlc = "3"
 blake3 = "1"
-bincode = "1"
+bincode = "3"
 dirs = "6"
 
 [dev-dependencies]
