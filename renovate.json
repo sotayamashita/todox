@@ -3,5 +3,12 @@
   "extends": [
     "config:recommended"
   ],
-  "automerge": true
+  "automerge": true,
+  "packageRules": [
+    {
+      "matchPackageNames": ["bincode"],
+      "allowedVersions": "<2.0.0",
+      "description": "bincode v3 is intentionally broken (compile_error!). v1.3.3 is the final stable release."
+    }
+  ]
 }
