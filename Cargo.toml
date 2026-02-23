@@ -3,6 +3,25 @@ name = "todo-scan"
 version = "0.1.0"
 edition = "2021"
 description = "Track TODO/FIXME/HACK comments with git-aware diff and CI gate"
+license = "MIT"
+repository = "https://github.com/sotayamashita/todo-scan"
+homepage = "https://github.com/sotayamashita/todo-scan"
+keywords = ["todo", "fixme", "ci", "lint", "code-quality"]
+categories = ["command-line-utilities", "development-tools"]
+readme = "README.md"
+exclude = [
+    "tests/",
+    "docs/",
+    ".github/",
+    ".claude/",
+    ".claude-plugin/",
+    "benches/",
+    "skills/",
+    "schema/",
+    "renovate.json",
+    ".todo-scan.toml",
+    "CLAUDE.md",
+]
 
 [dependencies]
 clap = { version = "4", features = ["derive"] }
