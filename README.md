@@ -16,7 +16,7 @@ A CI gate that fails your build when TODO comments exceed thresholds, so technic
 ### Quick start
 
 ```sh
-cargo install --path .
+cargo install todo-scan
 
 # See what you have
 todo-scan list
@@ -516,7 +516,7 @@ Glob patterns in member lists (e.g., `packages/*`, `crates/*`) are expanded auto
 ## Installation
 
 ```bash
-cargo install --path .
+cargo install todo-scan
 ```
 
 ## Usage
