@@ -40,7 +40,7 @@ clap_complete = "4"
 toml_edit = "0.25"
 time = { version = "0.3", features = ["local-offset"] }
 notify = "7"
-notify-debouncer-mini = "0.5"
+notify-debouncer-mini = "0.7"
 ctrlc = "3"
 blake3 = "1"
 bincode = "1"
