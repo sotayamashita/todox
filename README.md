@@ -1,6 +1,8 @@
 # todo-scan
 
-[![CI](https://github.com/sotayamashita/todox/actions/workflows/ci.yml/badge.svg)](https://github.com/sotayamashita/todox/actions/workflows/ci.yml) [![codecov](https://codecov.io/gh/sotayamashita/todox/graph/badge.svg)](https://codecov.io/gh/sotayamashita/todox) [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/sotayamashita/todox)
+[![CI](https://github.com/sotayamashita/todo-scan/actions/workflows/ci.yml/badge.svg)](https://github.com/sotayamashita/todo-scan/actions/workflows/ci.yml) 
+[![codecov](https://codecov.io/gh/sotayamashita/todo-scan/graph/badge.svg)](https://codecov.io/gh/sotayamashita/todo-scan)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/sotayamashita/todo-scan)
 
 A CI gate that fails your build when TODO comments exceed thresholds, so technical debt stays visible and under control.
 
