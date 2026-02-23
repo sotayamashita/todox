@@ -31,6 +31,10 @@ pub struct ScanCache {
     pub entries: HashMap<PathBuf, CacheEntry>,
 }
 
+/// Maximum cache file size (50 MiB) to prevent memory exhaustion from
+/// crafted or corrupted cache files.
+const MAX_CACHE_SIZE: usize = 50 * 1024 * 1024;
+
 impl ScanCache {
     /// Create a new empty cache with the given config hash.
     pub fn new(config_hash: [u8; 32]) -> Self {
@@ -40,11 +44,20 @@ impl ScanCache {
         }
     }
 
-    /// Load cache from disk. Returns None if missing or corrupt.
+    /// Deserialize cache data with a size limit.
+    /// Returns None if data exceeds the limit or is corrupt.
+    pub fn deserialize_with_limit(data: &[u8], max_size: usize) -> Option<Self> {
+        if data.len() > max_size {
+            return None;
+        }
+        bincode::deserialize(data).ok()
+    }
+
+    /// Load cache from disk. Returns None if missing, oversized, or corrupt.
     pub fn load(repo_root: &Path) -> Option<Self> {
         let path = cache_path(repo_root)?;
         let data = fs::read(&path).ok()?;
-        bincode::deserialize(&data).ok()
+        Self::deserialize_with_limit(&data, MAX_CACHE_SIZE)
     }
 
     /// Save cache to disk with atomic write (write tmp, then rename).
@@ -294,6 +307,43 @@ mod tests {
     fn test_load_missing_file_returns_none() {
         let dir = tempfile::tempdir().unwrap();
         assert!(ScanCache::load(dir.path()).is_none());
+    }
+
+    #[test]
+    fn test_deserialize_with_limit_rejects_oversized_data() {
+        // Create valid cache, serialize, then try with a tiny limit
+        let config_hash = ScanCache::config_hash(&Config::default());
+        let mut cache = ScanCache::new(config_hash);
+        let mtime = SystemTime::UNIX_EPOCH;
+        let hash = blake3::hash(b"content");
+        cache.insert(
+            PathBuf::from("test.rs"),
+            *hash.as_bytes(),
+            vec![make_item("test.rs", 1, Tag::Todo, "task")],
+            vec![],
+            mtime,
+        );
+        let data = bincode::serialize(&cache).unwrap();
+        // Use a limit smaller than the serialized data
+        assert!(ScanCache::deserialize_with_limit(&data, 1).is_none());
+    }
+
+    #[test]
+    fn test_deserialize_with_limit_accepts_valid_data() {
+        let config_hash = ScanCache::config_hash(&Config::default());
+        let mut cache = ScanCache::new(config_hash);
+        let mtime = SystemTime::UNIX_EPOCH;
+        let hash = blake3::hash(b"content");
+        cache.insert(
+            PathBuf::from("test.rs"),
+            *hash.as_bytes(),
+            vec![make_item("test.rs", 1, Tag::Todo, "task")],
+            vec![],
+            mtime,
+        );
+        let data = bincode::serialize(&cache).unwrap();
+        let loaded = ScanCache::deserialize_with_limit(&data, 50 * 1024 * 1024).unwrap();
+        assert_eq!(loaded.entries.len(), 1);
     }
 
     #[test]
